@@ -1,10 +1,10 @@
 fun main() {
     fun part1(balls: List<Int>, boards: List<Board>): Int {
-        balls.forEach m1@{ ball ->
+        balls.forEach { ball ->
             boards.forEach { board ->
                 board.checkBall(ball)
                 if (board.win) {
-                    println("Board win: $board")
+                    println("Board win: $board with ball $ball")
                     return board.sum * ball
                 }
             }
@@ -12,8 +12,18 @@ fun main() {
         return -1
     }
 
-    fun part2(input: List<String>): Int {
-        return input.size
+    fun part2(balls: List<Int>, boards: List<Board>): Int {
+        var lastResult = -1
+        balls.forEach { ball ->
+            boards.filterNot { it.win }.forEach boards@{ board ->
+                board.checkBall(ball)
+                if (board.win) {
+                    println("Board win: $board with ball $ball")
+                    lastResult = board.sum * ball
+                }
+            }
+        }
+        return lastResult
     }
 
     // test if implementation meets criteria from the description, like:
@@ -21,14 +31,17 @@ fun main() {
         val testInput = readInput("Day04_test")
         val testBalls = testInput[0].split(",").map { it.toInt() }
         val testBoards = inputParse(testInput.drop(2).filterNot { it.isBlank() })
-        check(part1(testBalls, testBoards) == 4512)
+        // Due to mutable state of boards you shall to run tests separately
+//        check(part1(testBalls, testBoards) == 4512)
+        check(part2(testBalls, testBoards) == 1924)
     }
 
     runMeasuredTime {
         val input = readInput("Day04")
         val balls = input[0].split(",").map { it.toInt() }
         val boards = inputParse(input.drop(2).filterNot { it.isBlank() })
-        println(part1(balls, boards))
+//        println(part1(balls, boards))
+        println(part2(balls, boards))
     }
 
 //    println(part2(input))
