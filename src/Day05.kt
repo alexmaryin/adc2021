@@ -3,10 +3,6 @@ fun main() {
         return processLines(size, lines)
     }
 
-    fun part2(input: List<String>): Int {
-        return input.size
-    }
-
     // test if implementation meets criteria from the description, like:
     runMeasuredTime {
         val testInput = readInput("Day05_test")

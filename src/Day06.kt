@@ -22,7 +22,7 @@ fun main() {
     // Buckets approach
     fun part2(days: Int, input: List<Int>): Long {
         // Each bucket contains count of fishes with age equals bucket-index
-        val buckets = buildMap {
+        val buckets = buildMap<Int, Long> {
             (0..6).forEach { put(it, input.count { age -> age == it }.toLong()) }
         }.toMutableMap()
         buckets[7] = 0
@@ -44,8 +44,8 @@ fun main() {
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day06_test")[0].split(",").map { it.toInt() }
     runMeasuredTime {
-        check(part1(18, testInput.toMutableList()) == 26)
-        check(part1(80, testInput.toMutableList()) == 5934)
+        check(part2(18, testInput.toMutableList()) == 26L)
+        check(part2(80, testInput.toMutableList()) == 5934L)
     }
 
     runMeasuredTime {
