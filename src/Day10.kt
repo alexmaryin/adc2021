@@ -9,9 +9,7 @@ fun main() {
             line.forEach { bracket ->
                 when (bracket) {
                     in openBrackets -> bracketStack.push(defineBracket(bracket))
-                    in closeBrackets -> if (isBracketValid(bracket, bracketStack.peek())) {
-                        bracketStack.pop()
-                    } else {
+                    in closeBrackets -> if (isBracketValid(bracket, bracketStack.pop()).not()) {
                         sum += defineBracket(bracket).score
                         return@line
                     }

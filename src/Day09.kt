@@ -1,4 +1,5 @@
 import utils.QueueSet
+import utils.convertToMatrix
 
 fun main() {
 
@@ -30,7 +31,7 @@ fun main() {
     }
 
     fun part1(input: List<String>): Int {
-        val digits = convertToMatrix(input)
+        val digits = input.convertToMatrix()
         val field = growField(digits)
 
         var sum = 0
@@ -41,7 +42,7 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        val digits = convertToMatrix(input)
+        val digits = input.convertToMatrix()
         val field = growField(digits)
 
         val lowPoints = mutableListOf<LowPoint>()
@@ -96,12 +97,6 @@ fun main() {
     }
     runMeasuredTime {
         println(part2(input))
-    }
-}
-
-fun convertToMatrix(strings: List<String>) = buildList {
-    strings.forEach { row ->
-        add(row.map { it.digitToInt() })
     }
 }
 
