@@ -48,10 +48,15 @@ fun main() {
         part1(field) {
             step = it
             var next = false
-            for (row in field.indices)
+            for (row in field.indices) {
+                if (next) break
                 for (col in 0 until field[0].size) {
-                    if (field[row][col] != 0) next = true
+                    if (field[row][col] != 0) {
+                        next = true
+                        break
+                    }
                 }
+            }
             next
         }
         return step
