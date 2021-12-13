@@ -1,3 +1,7 @@
+import utils.Line
+import utils.LineDirection
+import utils.Point
+
 fun main() {
     fun part1(size: Int, lines: List<Line>): Int {
         return processLines(size, lines)
@@ -24,18 +28,6 @@ fun main() {
         println(part1(1000, lines))
     }
 }
-
-data class Point(val x: Int, val y: Int) : Comparable<Point> {
-    override fun compareTo(other: Point): Int = when {
-        x != other.x -> x compareTo other.x
-        y != other.y -> y compareTo other.y
-        else -> 0
-    }
-}
-
-data class Line(val start: Point, val end: Point, val direction: LineDirection)
-
-enum class LineDirection { HORIZONTAL, VERTICAL, LEFT_DIAGONAL, RIGHT_DIAGONAL }
 
 fun parseInput(text: List<String>, filter: (Line) -> Boolean = { true }): List<Line> = text.map { line ->
     val (start, end) = line.split(",", " -> ", limit = 4)
