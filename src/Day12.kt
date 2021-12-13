@@ -1,87 +1,90 @@
-import utils.Graph
-import utils.Leaf
+import kotlin.contracts.contract
 
 fun main() {
-    fun part1(input: List<String>): Int {
+    fun part1(input: List<String>, allowTwice: Boolean = false): Int {
         val graph = input.buildGraph()
         println(graph)
-
-        val g = graph.traceGraph(graph.root(), 0)
-        println(g)
-        return g
-    }
-
-    fun part2(input: List<String>): Int {
-        return input.size
+        return trace("start", graph, allowTwice)
     }
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day12_test1")
-    check(part1(testInput) == 1)
+    check(part1(testInput) == 10)
+    check(part1(testInput, allowTwice = true) == 36)
 
-//    val input = readInput("Day12")
-//    println(part1(input))
-//    println(part2(input))
+    val input = readInput("Day12")
+    runMeasuredTime {
+        println(part1(input, allowTwice = false))
+    }
+    runMeasuredTime {
+        println(part1(input, allowTwice = true))
+    }
 }
 
-fun List<String>.buildGraph() = Graph<CaveItem>().apply {
-    forEach { line ->
-        val (parent, child) = line.split("-", limit = 2)
-            .map {
-                when {
-                    it == "start" -> CaveItem(it, CaveType.START)
-                    it == "end" -> CaveItem(it, CaveType.END)
-                    it.all { letter -> letter.isUpperCase() } -> CaveItem(it, CaveType.BIG)
-                    else -> CaveItem(it, CaveType.SMALL)
+fun List<String>.buildGraph(): Map<String, Set<String>> {
+    val map = mutableMapOf<String, Set<String>>()
+    forEach {
+        val (left, right) = it.split("-", limit = 2)
+        val leftSet = map[left]?.toMutableSet() ?: mutableSetOf()
+        leftSet.add(right)
+        map[left] = leftSet.toSet()
+        if (left != "start") {
+            val rightSet = map[right]?.toMutableSet() ?: mutableSetOf()
+            rightSet.add(left)
+            map[right] = rightSet.toSet()
+        }
+    }
+    return map.toMap()
+}
+
+data class Path(
+    val route: MutableList<String>,
+    val caves: MutableSet<String> = mutableSetOf(),
+    val hasDouble: Boolean = false
+)
+
+fun trace(initial: String, graph: Map<String, Set<String>>, allowTwice: Boolean = false): Int {
+    var count = 0
+    val paths = mutableListOf(Path(mutableListOf(initial)))
+
+    while (paths.isNotEmpty()) {
+        val nextPath = paths.removeFirst()
+        graph[nextPath.route.last()]?.forEach { child ->
+            when {
+                child == "end" -> {
+//                    nextPath.route += child
+                    count++
+//                    println("$count: ${nextPath.route}")
                 }
-            }.sorted()
-
-        insert(parent, addOnTop = parent.type == CaveType.START)
-        insert(child, parent = parent)
+                child.isLowerCase() -> {
+                    if (child !in nextPath.caves)
+                        paths.add(
+                            Path(
+                                (nextPath.route + child).toMutableList(),
+                                (nextPath.caves + child).toMutableSet(),
+                                nextPath.hasDouble
+                            )
+                        )
+                    else if (allowTwice && nextPath.hasDouble.not())
+                        paths.add(
+                            Path(
+                                (nextPath.route + child).toMutableList(),
+                                (nextPath.caves + child).toMutableSet(),
+                                true
+                            )
+                        )
+                }
+                else -> paths.add(
+                    Path(
+                        (nextPath.route + child).toMutableList(),
+                        nextPath.caves,
+                        nextPath.hasDouble
+                    )
+                )
+            }
+        }
     }
+    return count
 }
 
-data class CaveItem(
-    val name: String,
-    val type: CaveType
-) : Comparable<CaveItem> {
-
-    override fun compareTo(other: CaveItem): Int = when (other.type) {
-        CaveType.START -> 1
-        CaveType.END -> -1
-        else -> name compareTo other.name
-    }
-
-    override fun toString() = name
-}
-
-enum class CaveType {
-    START, BIG, SMALL, END
-}
-
-fun Graph<CaveItem>.traceGraph(leaf: Leaf<CaveItem>, routes: Int, visited: MutableList<CaveItem> = mutableListOf()): Int {
-    print("${leaf.item.name}-")
-    if (leaf.item.type == CaveType.END) {
-        print(" finished, total ${routes+1}\n")
-        return routes + 1
-    }
-
-    if (leaf.item.type == CaveType.SMALL && parent(leaf)?.item?.type == CaveType.SMALL) {
-        print(" bad route, total finished $routes\n")
-        return routes
-    }
-
-    if(leaf.item.type == CaveType.SMALL) {
-        visited += leaf.item
-    }
-
-    if (leaf.children.isEmpty()) {
-        traceGraph(parent(leaf)!!, routes, visited)
-    }
-
-    var stepRoutes = 0
-    leaf.children.forEach {
-        if (visited.contains(it.item).not()) stepRoutes += traceGraph(it, stepRoutes, visited)
-    }
-    return routes + stepRoutes
-}
+fun String.isLowerCase() = this == lowercase()
