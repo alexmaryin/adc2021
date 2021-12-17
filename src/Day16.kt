@@ -48,8 +48,7 @@ sealed class Item(var version: Int = 0) {
     data class Operator(val literals: List<Item>, var operator: Int = 0) : Item() {
         override fun countVersion() = version + literals.sumOf { it.countVersion() }
 
-        override fun expression(): BigInteger =
-            when (operator) {
+        override fun expression(): BigInteger = when (operator) {
                 0 -> literals.drop(1).fold(literals.first().expression()) { acc, next -> acc + next.expression() }
                 1 -> literals.drop(1).fold(literals.first().expression()) { acc, next -> acc * next.expression() }
                 2 -> literals.minOf { it.expression() }
